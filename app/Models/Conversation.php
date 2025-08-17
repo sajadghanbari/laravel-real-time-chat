@@ -27,4 +27,10 @@ class Conversation extends Model
     {
         return $this->belongsTo(User::class, 'user_id2');
     }
+
+    public static function getConversationForSidebar(User $exceptUser)
+    {
+        $users = User::getUserExcept($exceptUser);
+        $groups = Group::getGroupsForUser($exceptUser);
+    }
 }
