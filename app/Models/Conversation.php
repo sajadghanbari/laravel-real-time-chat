@@ -30,7 +30,12 @@ class Conversation extends Model
 
     public static function getConversationForSidebar(User $exceptUser)
     {
-        $users = User::getUserExcept($exceptUser);
+        $users = User::getUserExceptUser($exceptUser);
         $groups = Group::getGroupsForUser($exceptUser);
+        return $users->map(function (User $user){
+            return $user->toConversationArray();
+        })->concat($groups->map(function (Group $group) use ($exceptUser) {
+            return $group->toConversationArray($exceptUser);
+        }))->sortByDesc('last_message.created_at')->values();
     }
 }
