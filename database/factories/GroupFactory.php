@@ -18,7 +18,7 @@ class GroupFactory extends Factory
     {
         return [
             'name' => $this->faker->name,
-            'description' => $this->faker->sentences,
+            'description' => $this->faker->sentence,
         ];
     }
 }

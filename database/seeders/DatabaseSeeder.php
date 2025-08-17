@@ -39,7 +39,7 @@ class DatabaseSeeder extends Seeder
             ]);
 
             $users = User::inRandomOrder()->limit(rand(2, 5))->pluck('id');
-            $group->users()->attach(1,...$users);
+            $group->users()->attach(array_unique([1,...$users]));
 
         }
         Message::factory(500)->create();
@@ -51,7 +51,7 @@ class DatabaseSeeder extends Seeder
             return [
                 'user_id1' => $groupedMessages->first()->sender_id,
                 'user_id2' => $groupedMessages->first()->receiver_id,
-                'last_message' => $groupedMessages->last()->id,
+                'last_message_id' => $groupedMessages->last()->id,
                 'created_at' => new Carbon(),
                 'updated_at' => new Carbon(),
             ];
