@@ -14,3 +14,5 @@ const GroupAvatar = ({ }) => {
         </>
     )
 }
+
+export default GroupAvatar;

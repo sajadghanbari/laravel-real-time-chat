@@ -1,8 +1,41 @@
 import { Menu, Transition } from "@headlessui/react";
 import { EllipsisVerticalIcon, LockOpenIcon, ShieldCheckIcon, UserIcon } from "@heroicons/react/24/solid";
+import axios from "axios";
 import { Fragment } from "react";
 
 function UserOptionsDropDown({ conversation }) {
+
+    const changeUserRole = () => {
+        // Logic to change user role
+        console.log("User role changed");
+        if (!conversation.is_user){
+            return
+        }
+
+        axios.post(route("user.changeRole",conversation.id))
+            .then((res) => {
+                console.log("res.data");
+            })
+            .catch((err) => {
+                console.error("Error changing user role:", err);
+            });
+    };
+
+    const onBlockUser = () => {
+        console.log("User blocked");
+        if (!conversation.is_user){
+            return
+        }
+
+        axios.post(route("user.blockUnblock", conversation.id))
+            .then((res) => {
+                console.log("User blocked:", res.data);
+            })
+            .catch((err) => {
+                console.error("Error blocking user:", err);
+            });
+    }
+
     return (
         <Menu as='div' className="relative inline-block text-left">
             <div>
