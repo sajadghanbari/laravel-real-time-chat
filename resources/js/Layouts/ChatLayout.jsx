@@ -3,6 +3,7 @@ import Echo from "laravel-echo";
 import { use, useEffect, useState } from "react";
 import { PencilSquareIcon } from '@heroicons/react/24/solid'
 import TextInput from "@/Components/TextInput";
+import ConversationItem from "@/Components/App/ConversationItem";
 
 
 
@@ -27,7 +28,7 @@ const ChatLayout = ({ children }) => {
                 );
             })
         );
-
+    }
     console.log("conversations", conversations)
     console.log("selectedConversation", selectedConversation)
 
