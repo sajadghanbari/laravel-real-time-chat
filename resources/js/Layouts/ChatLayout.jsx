@@ -105,7 +105,7 @@ return (
                 <div className="flex items-center justify-between py-2 px-3 text-xl font-medium">
                     <span>Conversations</span>
                     <div className="tooltip tooltip-left" data-tip="Create new Group">
-                        <button className="text-gray-400 hover:text-grey-200">
+                        <button className="text-gray-400 hover:text-grey-300">
                             <PencilSquareIcon className="w-4 h-4 inline-block ml-2" />
                             New Group
                         </button>
