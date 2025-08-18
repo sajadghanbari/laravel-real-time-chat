@@ -28,14 +28,14 @@ class Conversation extends Model
         return $this->belongsTo(User::class, 'user_id2');
     }
 
-    public static function getConversationForSidebar(User $exceptUser)
+    public static function getConversationForSidebar(User $user)
     {
-        $users = User::getUserExceptUser($exceptUser);
-        $groups = Group::getGroupsForUser($exceptUser);
+        $users = User::getUserExceptUser($user);
+        $groups = Group::getGroupsForUser($user);
         return $users->map(function (User $user){
             return $user->toConversationArray();
-        })->concat($groups->map(function (Group $group) use ($exceptUser) {
-            return $group->toConversationArray($exceptUser);
+        })->concat($groups->map(function (Group $group) use ($user) {
+            return $group->toConversationArray($user);
         }))->sortByDesc('last_message.created_at')->values();
     }
 }

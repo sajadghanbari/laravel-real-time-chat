@@ -9,7 +9,7 @@ const ChatLayout = ({ children }) => {
     const page = usePage();
     const conversations = page.props.conversations;
     const selectedConversations = page.props.selectedConversations
-    const [localConversations, setLocalConversations] = useState([]);
+    const [localConversations, setLocalConversations] = useState(conversations);
     const [sortedConversations, setSortedConversations] = useState([]);
     const [onlineUsers, setOnlineUsers] = useState({});
     const isUserOnline = (userId) => onlineUsers[userId];
@@ -28,7 +28,7 @@ const ChatLayout = ({ children }) => {
                     return -1;
                 }
                 if (a.last_message_date && b.last_message_date) {
-                    return b.last_message_date.localCompare(
+                    return b.last_message_date.localeCompare(
                         a.last_message_date
                     );
                 }else if (a.last_message_date) {
