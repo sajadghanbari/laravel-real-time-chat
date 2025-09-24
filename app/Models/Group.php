@@ -42,7 +42,7 @@ class Group extends Model
         return $query->get();
     }
 
-    public function toConversationArray(User $exceptUser): array
+    public function toConversationArray(): array
     {
         return [
             'id' => $this->id,
@@ -56,5 +56,12 @@ class Group extends Model
             'last_message' => $this->last_message,
             'last_message_date' => $this->last_message_date,
         ];
+    }
+    public static function updateGroupWithMessage($groupId, $message)
+    {
+        return self::updateOrCreate(
+            ['id' => $groupId],
+            ['last_message_id' => $message->id]
+        );
     }
 }
