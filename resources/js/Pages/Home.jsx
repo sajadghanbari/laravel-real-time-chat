@@ -1,5 +1,6 @@
 // import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import ConversationHeader from '@/Components/App/ConversationHeader';
+import MessageInput from '@/Components/App/MessageInput';
 import MessageItem from '@/Components/App/MessageItem';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import ChatLayout from '@/Layouts/ChatLayout';
@@ -13,6 +14,12 @@ function Home(selectedConversation = null, messages = null) {
     messages = messagesProp;
     const [localMessages, setLocalMessages] = useState([]);
     const messagesCtrRef = useRef(null);
+
+    useEffect(() => {
+        setTimeout(() => {
+            messagesCtrRef.current.scrollTop = messagesCtrRef.current.scrollHeight;
+        }, 10);
+    },[selectedConversation])
 
     useEffect(() => {
         if (messages) {
@@ -59,7 +66,7 @@ function Home(selectedConversation = null, messages = null) {
                             </div>
                         )}
                     </div>
-                    {/* <MessageInput conversation={selectedConversation}/> */}
+                    <MessageInput conversation={selectedConversation}/>
                 </>
             )}
         </>

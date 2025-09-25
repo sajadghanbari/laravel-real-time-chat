@@ -16,12 +16,12 @@ const MessageItem = ({ message }) => {
             {<UserAvatar user={message.sender} />}
             <div className="chat-header">
                 {message.sender_id !== currentUser.id  ? message.sender.name : "You"}
-                <time datetime="" className="text-xs opacity-50 ml-2">
+                <time dateTime="" className="text-xs opacity-50 ml-2">
                     {formatMessageDateLong(message.created_at)}
                 </time>
             </div>
             <div className={"chat-bubble relative" + 
-                (message.sender_id === currentUser.id ? " chat-bubble-info" : " chat-bubble-secondary")
+                (message.sender_id === currentUser.id ? " chat-bubble-info" : " chat-bubble-primary")
             } 
         >   
             <div className="chat-message">
