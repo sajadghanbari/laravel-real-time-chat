@@ -3,10 +3,12 @@ import ConversationHeader from '@/Components/App/ConversationHeader';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import ChatLayout from '@/Layouts/ChatLayout';
 import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/solid';
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 
 function Home(messages) {
+    const page = usePage();
+    const selectedConversation = page.props.selectedConversation;
     const [localMessages, setLocalMessages] = useState([]);
     const messagesCtrRef = useRef(null);
     useEffect(() => {
