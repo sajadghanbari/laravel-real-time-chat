@@ -19,22 +19,25 @@ class MessageController extends Controller
     public function byUser(User $user)
     {
         $messages = Message::where('sender_id', Auth::id())
-        ->where('receiver_id', $user->id)->get()
+        ->where('receiver_id', $user->id)
         ->orWhere('sender_id', $user->id)
-        ->where('receiver_id', Auth::id())->get()
+        ->where('receiver_id', Auth::id())
         ->latest()
-        ->paginate(10);
+        ->paginate(20);
+                //   dd($messages->toArray());
         return  inertia('Home', [
             'selectedConversation' => $user->toConversationArray(),
-            'messages' => MessageResource::collection($messages),
+            'messages' => MessageResource::collection($messages)->response()->getData(true),
+           
         ]);
+
     }
 
     public function byGroup(Group $group)
     {
         $messages = Message::where('group_id', $group->id)
             ->latest()
-            ->paginate(10);
+            ->paginate(20);
 
         return inertia('Home', [
             'selectedConversation' => $group->toConversationArray(),
@@ -60,6 +63,7 @@ class MessageController extends Controller
             ->latest()
             ->paginate(10);
         }
+        
         return MessageResource::collection($messages);
     }
 
@@ -110,7 +114,7 @@ class MessageController extends Controller
         if($message->sender_id !== Auth::id()){
             return response()->json(['message' => 'Forbidden'],403);
         }
-        $message->delete;
+        $message->delete();
         return response('',204);
     }
 

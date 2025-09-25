@@ -1,19 +1,25 @@
 // import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import ConversationHeader from '@/Components/App/ConversationHeader';
+import MessageItem from '@/Components/App/MessageItem';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import ChatLayout from '@/Layouts/ChatLayout';
 import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/solid';
 import { Head, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 
-function Home(messages) {
-    const page = usePage();
-    const selectedConversation = page.props.selectedConversation;
+function Home(selectedConversation = null, messages = null) {
+    const { messages: messagesProp, selectedConversation: selectedConversationProp } = usePage().props;
+    selectedConversation = selectedConversationProp;
+    messages = messagesProp;
     const [localMessages, setLocalMessages] = useState([]);
     const messagesCtrRef = useRef(null);
+
     useEffect(() => {
-        setLocalMessages(messages);
-    }, [messages])
+        if (messages) {
+            setLocalMessages(messages.data);
+        }
+    }, [messages.data]);
+    console.log("messages", messages.data)
     return (
         <>
             {!messages && (
@@ -53,7 +59,7 @@ function Home(messages) {
                             </div>
                         )}
                     </div>
-                    <MessageInput conversation={selectedConversation}/>
+                    {/* <MessageInput conversation={selectedConversation}/> */}
                 </>
             )}
         </>
@@ -65,7 +71,7 @@ Home.layout = (page) => {
         <AuthenticatedLayout
             user={page.props.auth.user}
         >
-            <ChatLayout>children={page}</ChatLayout>
+            <ChatLayout children={page}></ChatLayout>
         </AuthenticatedLayout>
     )
 }
