@@ -16,10 +16,10 @@ function Home(selectedConversation = null, messages = null) {
 
     useEffect(() => {
         if (messages) {
-            setLocalMessages(messages.data);
+            setLocalMessages(messages.data.reverse());
         }
-    }, [messages.data]);
-    console.log("messages", messages.data)
+    }, [messages]);
+    console.log("messages", messages)
     return (
         <>
             {!messages && (

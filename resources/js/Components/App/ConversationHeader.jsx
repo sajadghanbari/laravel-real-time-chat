@@ -17,10 +17,10 @@ const ConversationHeader = ({ selectedConversation }) => {
                         </Link>
                         {selectedConversation.is_user && (
                             <UserAvatar
-                                user={selectedConversation.user}
+                               user={selectedConversation}
                                 size="md"/>
                         )}
-                        {!selectedConversation.is_group && (
+                        {selectedConversation.is_group && (
                             <GroupAvatar />
                         )}
                         <div>
