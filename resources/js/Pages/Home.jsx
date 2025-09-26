@@ -2,6 +2,7 @@
 import ConversationHeader from '@/Components/App/ConversationHeader';
 import MessageInput from '@/Components/App/MessageInput';
 import MessageItem from '@/Components/App/MessageItem';
+import { useEventBus } from '@/EventBus';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import ChatLayout from '@/Layouts/ChatLayout';
 import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/solid';
@@ -14,14 +15,28 @@ function Home(selectedConversation = null, messages = null) {
     messages = messagesProp;
     const [localMessages, setLocalMessages] = useState([]);
     const messagesCtrRef = useRef(null);
+    const { on } = useEventBus();
+    const messageCreated = (message) => {
+        if (selectedConversation && selectedConversation.is_group && selectedConversation.id == message.group_id) {
+            setLocalMessages((prevMessages) => [...prevMessages, message]);
+        }
+        if (selectedConversation && selectedConversation.is_user && selectedConversation.id == message.sender_id || selectedConversation.id == message.receiver_id) {
+            setLocalMessages((prevMessages) => [...prevMessages, message]);
+        }
+    };
 
+console.log("selectedConversation", selectedConversation)
     useEffect(() => {
         setTimeout(() => {
-            if(messagesCtrRef.current){
+            if (messagesCtrRef.current) {
                 messagesCtrRef.current.scrollTop = messagesCtrRef.current.scrollHeight;
             }
         }, 10);
-    },[selectedConversation])
+        const offCreated = on('message.created', messageCreated);
+        return () => {
+            offCreated();
+        }
+    }, [selectedConversation])
 
     useEffect(() => {
         if (messages) {
@@ -68,7 +83,7 @@ function Home(selectedConversation = null, messages = null) {
                             </div>
                         )}
                     </div>
-                    <MessageInput conversation={selectedConversation}/>
+                    <MessageInput conversation={selectedConversation} />
                 </>
             )}
         </>
