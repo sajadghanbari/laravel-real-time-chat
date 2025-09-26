@@ -3,14 +3,45 @@ import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import Echo from 'laravel-echo';
+
+import { useEffect, useState } from 'react';
+
+
+
+
+
+
 
 export default function AuthenticatedLayout({ header, children }) {
+    
     const page = usePage();
     const user = usePage().props.auth.user;
-
+    const conversations = page.props.conversations;
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
+useEffect(() => {
+    conversations.forEach((conversation) => {
+        let channelName = `message.group.${conversation.id}`;
+        if (conversation.is_user) {
+            channelName = `message.user.${[parseInt(user.id), parseInt(conversation.id)].sort((a,b) => a - b).join('-')}`;
+        }
+
+        // اینجا مستقیم listen روی Echo استفاده می‌کنیم
+        window.Echo.private(channelName, 'SocketMessage', (e) => {
+            console.log('Received event on channel:', channelName, e);
+            const message = e.message;
+            if (message.sender_id === user.id) return;
+
+            console.log('New message:', message);
+        });
+    });
+
+    // cleanup اگر نیاز هست می‌تونی leaveAllChannels بزنی
+    return () => {
+        window.Echo.leaveAllChannels();
+    };
+}, [conversations]);
 
 
 
