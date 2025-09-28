@@ -12,6 +12,7 @@ use App\Models\MessageAttachment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 
 class MessageController extends Controller
@@ -19,18 +20,17 @@ class MessageController extends Controller
     public function byUser(User $user)
     {
         $messages = Message::where('sender_id', Auth::id())
-        ->where('receiver_id', $user->id)
-        ->orWhere('sender_id', $user->id)
-        ->where('receiver_id', Auth::id())
-        ->latest()
-        ->paginate(20);
-                //   dd($messages->toArray());
+            ->where('receiver_id', $user->id)
+            ->orWhere('sender_id', $user->id)
+            ->where('receiver_id', Auth::id())
+            ->latest()
+            ->paginate(20);
+        //   dd($messages->toArray());
         return  inertia('Home', [
             'selectedConversation' => $user->toConversationArray(),
             'messages' => MessageResource::collection($messages)->response()->getData(true),
-           
-        ]);
 
+        ]);
     }
 
     public function byGroup(Group $group)
@@ -58,64 +58,76 @@ class MessageController extends Controller
                     $query->where('sender_id', $message->sender_id)
                         ->where('receiver_id', $message->receiver_id)
                         ->orWhere('sender_id', $message->receiver_id)
-                        ->where('receiver_id',$message->sender_id);
-            })
-            ->latest()
-            ->paginate(100);
+                        ->where('receiver_id', $message->sender_id);
+                })
+                ->latest()
+                ->paginate(100);
         }
-        
+
         return MessageResource::collection($messages);
     }
 
-    public function store(StoreMessageRequest $request)
-    {
-        $data = $request->validated();
-        $data['sender_id'] = Auth::id();
-        $receiverId = $data['receiver_id'] ?? null;
-        $groupId = $data['group_id'] ?? null;
+public function store(StoreMessageRequest $request)
+{
+    $data = $request->validated();
+    $data['sender_id'] = Auth::id();
+    $receiverId = $data['receiver_id'] ?? null;
+    $groupId = $data['group_id'] ?? null;
 
-        $files = $data['attachments'] ?? [];
+    // فایل‌های ضمیمه (ممکنه خالی باشن)
+    $files = $request->file('attachments', []);
 
-        $message = Message::create($data);
+    // ایجاد پیام اصلی
+    $message = Message::create($data);
 
-        $attachments = [];
-        if ($files){
-            foreach ($files as $file) {
-                $directory = 'attachments/' . date('Y/m/d');
-                Storage::makeDirectory($directory, 0755, true, true);
+    $attachments = [];
 
-                $model = [
-                    'name' => $file->getClientOriginalName(),
-                    'mime' => $file->getClientMimeType(),
-                    'size' => $file->getSize(),
-                    'message_id' => $message->id,
-                    'path' => $file->store($directory, 'public'),
-                ];
-                $attachments = MessageAttachment::create($model);
-                $attachments[] = $attachments;
+    if (!empty($files)) {
+        foreach ($files as $file) {
+            $directory = 'attachments/' . date('Y/m/d');
+            Storage::disk('public')->makeDirectory($directory, 0755, true);
+
+            $path = $file->store($directory, 'public');
+
+            $model = [
+                'name' => $file->getClientOriginalName(),
+                'mime' => $file->getClientMimeType(),
+                'path' => $path,
+                'message_id' => $message->id,
+            ];
+
+            // اگر ستون size وجود داشت اضافه کن
+            if (Schema::hasColumn('message_attachments', 'size')) {
+                $model['size'] = $file->getSize();
             }
-            $message->attachments = $attachments;
-        }
-        if($receiverId){
-            Conversation::updateConversationWithMessage($receiverId , Auth::id(), $message);
-        }
 
-        if($groupId){
-            Group::updateGroupWithMessage($groupId,$message);
+            $attachments[] = MessageAttachment::create($model);
         }
-        SocketMessage::dispatch($message);
-
-        return new MessageResource($message);
     }
-    
 
-    public function destroy (Message $message)
+    $message->load('attachments');
+
+    if ($receiverId) {
+        Conversation::updateConversationWithMessage($receiverId, Auth::id(), $message);
+    }
+
+    if ($groupId) {
+        Group::updateGroupWithMessage($groupId, $message);
+    }
+
+    SocketMessage::dispatch($message);
+
+    return new MessageResource($message);
+}
+
+
+
+    public function destroy(Message $message)
     {
-        if($message->sender_id !== Auth::id()){
-            return response()->json(['message' => 'Forbidden'],403);
+        if ($message->sender_id !== Auth::id()) {
+            return response()->json(['message' => 'Forbidden'], 403);
         }
         $message->delete();
-        return response('',204);
+        return response('', 204);
     }
-
 }

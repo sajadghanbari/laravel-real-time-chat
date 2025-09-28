@@ -1,4 +1,5 @@
 // import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AttachmentPreviewModal from '@/Components/App/AttachmentPreviewModal';
 import ConversationHeader from '@/Components/App/ConversationHeader';
 import MessageInput from '@/Components/App/MessageInput';
 import MessageItem from '@/Components/App/MessageItem';
@@ -15,6 +16,8 @@ function Home(selectedConversation = null, messages = null) {
     messages = messagesProp;
     const [localMessages, setLocalMessages] = useState([]);
     const messagesCtrRef = useRef(null);
+    const [showAttachmentPreview, setShowAttachmentPreview] = useState(false);
+    const [previewAttachment,setPreviewAttachment] = useState({});
     const { on } = useEventBus();
     const messageCreated = (message) => {
         if (selectedConversation && selectedConversation.is_group && selectedConversation.id == message.group_id) {
@@ -23,6 +26,10 @@ function Home(selectedConversation = null, messages = null) {
         if (selectedConversation && selectedConversation.is_user && selectedConversation.id == message.sender_id || selectedConversation.id == message.receiver_id) {
             setLocalMessages((prevMessages) => [...prevMessages, message]);
         }
+    };
+    const AttachmentClick = (attachment , index) => {
+        setPreviewAttachment({ attachment, index });
+        setShowAttachmentPreview(true);
     };
 
 console.log("selectedConversation", selectedConversation)
@@ -86,6 +93,16 @@ console.log("selectedConversation", selectedConversation)
                     <MessageInput conversation={selectedConversation} />
                 </>
             )}
+            {previewAttachment.attachment && (
+                    <AttachmentPreviewModal
+                    attachments = {previewAttachment.attachments}
+                    index={previewAttachment.index}
+                    show={showAttachmentPreview}
+                    onClose={() => setShowAttachmentPreview(false)}
+                    />
+
+                    
+                )}
         </>
     );
 }
