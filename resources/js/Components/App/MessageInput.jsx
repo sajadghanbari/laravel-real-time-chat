@@ -37,6 +37,10 @@ const MessageInput = ({ conversation = null }) => {
         });
     }
     const onSendClick = () => {
+        if(messageSending){
+            return;
+        }
+
         if (newMessage.trim() === "" && chosenFiles.length === 0) {
             setInputErrorMessage("Message cannot be empty");
 
