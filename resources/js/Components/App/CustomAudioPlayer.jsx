@@ -1,7 +1,7 @@
 import { PauseCircleIcon, PlayCircleIcon } from '@heroicons/react/24/solid';
 import React, { useRef, useState } from 'react';
 
-const CustomAudioPlayer = ({file}) => {
+const CustomAudioPlayer = ({file,showVolume = true}) => {
     const audioRef = useRef();
     const [isPlaying, setIsPlaying] = useState(false);
     const [volume, setVolume] = useState(1);
@@ -9,6 +9,7 @@ const CustomAudioPlayer = ({file}) => {
     const [currentTime, setCurrentTime] = useState(0);
 
     const togglePlayPause = () => {
+        const audio = audioRef.current;
         if (isPlaying) {
             audio.pause();
         } else {
@@ -54,18 +55,18 @@ const CustomAudioPlayer = ({file}) => {
             <button onClick={togglePlayPause}>
                 {isPlaying ? <PauseCircleIcon className="w-6 text-gray-400" /> : <PlayCircleIcon className="w-6 text-gray-400" />}
             </button>
-            {/* {showVolume && (
+            {showVolume && (
                 <input
-                    type="rang"
+                    type="range"
                     min="0"
                     max="1"
                     step="0.01"
                     value={volume}
                     onChange={handleVolumeChange}
                 />
-            )} */}
+            )}
             <input
-                type="rang"
+                type="range"
                 className="flex-1"
                 min="0"
                 max={duration}

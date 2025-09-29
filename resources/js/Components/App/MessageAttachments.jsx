@@ -1,17 +1,16 @@
 import { isAudio, isImage, isPDF, isPreViewable, isVideo } from '@/helpers';
-import { ArrowDownTrayIcon, PaperClipIcon, PlayCircleIcon } from '@heroicons/react/24/solid';
+import { ArrowDownTrayIcon, BookOpenIcon, PaperClipIcon, PlayCircleIcon } from '@heroicons/react/24/solid';
 import React, { useState } from 'react';
 // const [previewAttachment, setPreviewAttachment ] = useState({});
 
 const MessageAttachments = ({ attachments, attachmentClick }) => {
+        const [showAttachmentPreview, setShowAttachmentPreview] = useState(true);
+    const [previewAttachment, setPreviewAttachment] = useState(null);
         const AttachmentClick = (attachment , index) => {
         setPreviewAttachment({ attachment, index });
         setShowAttachmentPreview(true);
     };
-    //     const AttachmentClick = (attachment , index) => {
-    //     setPreviewAttachment({ attachment, index });
-    //     setShowAttachmentPreview(true);
-    // };
+
     return (
         <>
             {attachments.length > 0 && (
@@ -64,16 +63,15 @@ const MessageAttachments = ({ attachments, attachmentClick }) => {
                                 </div>
                             )}
                             {isPDF(attachment) && (
-                                <div className="relative flex justify-center items-center">
-                                    <div className="absolute left-0 top-0 right-0 bottom-0">
-                                        {/* PDF content or overlay will go here */}
-                                    </div>
-                                    <iframe
-                                        src={attachment.url}
-                                        frameborder="0"
-                                        className='w-full h-full'
-                                    ></iframe>
-                                </div>
+                                <a
+                                    onClick={(ev) => ev.stopPropagation()}
+                                    download
+                                    href={attachment.url}
+                                    className='flex flex-col justify-center items-center'
+                                >
+                                    <BookOpenIcon className="w-10 h-10 mb-3" />
+                                    <small>{attachment.name}</small>
+                                </a>
                             )}
                             {!isPreViewable(attachment) && (
                                 <a
