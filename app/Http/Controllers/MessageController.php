@@ -67,58 +67,58 @@ class MessageController extends Controller
         return MessageResource::collection($messages);
     }
 
-public function store(StoreMessageRequest $request)
-{
-    $data = $request->validated();
-    $data['sender_id'] = Auth::id();
-    $receiverId = $data['receiver_id'] ?? null;
-    $groupId = $data['group_id'] ?? null;
+    public function store(StoreMessageRequest $request)
+    {
+        $data = $request->validated();
+        $data['sender_id'] = Auth::id();
+        $receiverId = $data['receiver_id'] ?? null;
+        $groupId = $data['group_id'] ?? null;
 
-    // فایل‌های ضمیمه (ممکنه خالی باشن)
-    $files = $request->file('attachments', []);
+        // فایل‌های ضمیمه (ممکنه خالی باشن)
+        $files = $request->file('attachments', []);
 
-    // ایجاد پیام اصلی
-    $message = Message::create($data);
+        // ایجاد پیام اصلی
+        $message = Message::create($data);
 
-    $attachments = [];
+        $attachments = [];
 
-    if (!empty($files)) {
-        foreach ($files as $file) {
-            $directory = 'attachments/' . date('Y/m/d');
-            Storage::disk('public')->makeDirectory($directory, 0755, true);
+        if (!empty($files)) {
+            foreach ($files as $file) {
+                $directory = 'attachments/' . date('Y/m/d');
+                Storage::disk('public')->makeDirectory($directory, 0755, true);
 
-            $path = $file->store($directory, 'public');
+                $path = $file->store($directory, 'public');
 
-            $model = [
-                'name' => $file->getClientOriginalName(),
-                'mime' => $file->getClientMimeType(),
-                'path' => $path,
-                'message_id' => $message->id,
-            ];
+                $model = [
+                    'name' => $file->getClientOriginalName(),
+                    'mime' => $file->getClientMimeType(),
+                    'path' => $path,
+                    'message_id' => $message->id,
+                ];
 
-            // اگر ستون size وجود داشت اضافه کن
-            if (Schema::hasColumn('message_attachments', 'size')) {
-                $model['size'] = $file->getSize();
+                // اگر ستون size وجود داشت اضافه کن
+                if (Schema::hasColumn('message_attachments', 'size')) {
+                    $model['size'] = $file->getSize();
+                }
+
+                $attachments[] = MessageAttachment::create($model);
             }
-
-            $attachments[] = MessageAttachment::create($model);
         }
+
+        $message->load('attachments');
+
+        if ($receiverId) {
+            Conversation::updateConversationWithMessage($receiverId, Auth::id(), $message);
+        }
+
+        if ($groupId) {
+            Group::updateGroupWithMessage($groupId, $message);
+        }
+
+        SocketMessage::dispatch($message);
+
+        return new MessageResource($message);
     }
-
-    $message->load('attachments');
-
-    if ($receiverId) {
-        Conversation::updateConversationWithMessage($receiverId, Auth::id(), $message);
-    }
-
-    if ($groupId) {
-        Group::updateGroupWithMessage($groupId, $message);
-    }
-
-    SocketMessage::dispatch($message);
-
-    return new MessageResource($message);
-}
 
 
 
@@ -127,7 +127,24 @@ public function store(StoreMessageRequest $request)
         if ($message->sender_id !== Auth::id()) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
+        $group = null;
+        $conversation = null;
+        $lastMessage = null;
+        if ($message->group_id) {
+            $group = Group::where('last_message_id', $message->id)->first();
+        } else {
+            $conversation = Conversation::where('last_message_id', $message->id)->first();
+        }
+
+
         $message->delete();
-        return response('', 204);
+        if ($group) {
+            $group = Group::find($group->id);
+            $lastMessage = $group->lastMessage;
+        } else if ($conversation) {
+            $conversation = Conversation::find($conversation->id);
+            $lastMessage = $conversation->lastMessage;
+        }
+        return response()->json(['message' => $lastMessage ? new MessageResource($lastMessage) : null]);
     }
 }

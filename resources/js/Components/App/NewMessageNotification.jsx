@@ -12,10 +12,8 @@ export default function NewMessageNotification() {
         on("newMessageNotification", ({ message, user, group_id }) => {
             const uuid = uuidv4();
 
-            // فقط آخرین toast رو نگه داریم
             setToast({ message, uuid, user, group_id });
 
-            // بعد از ۳ ثانیه پاک بشه
             setTimeout(() => {
                 setToast(null);
             }, 5000);

@@ -17,22 +17,32 @@ function Home(selectedConversation = null, messages = null) {
     const [localMessages, setLocalMessages] = useState([]);
     const messagesCtrRef = useRef(null);
     const [showAttachmentPreview, setShowAttachmentPreview] = useState(false);
-    const [previewAttachment,setPreviewAttachment] = useState({});
+    const [previewAttachment, setPreviewAttachment] = useState({});
     const { on } = useEventBus();
     const messageCreated = (message) => {
         if (selectedConversation && selectedConversation.is_group && selectedConversation.id == message.group_id) {
             setLocalMessages((prevMessages) => [...prevMessages, message]);
-        }
-        if (selectedConversation && selectedConversation.is_user && selectedConversation.id == message.sender_id || selectedConversation.id == message.receiver_id) {
+        } else if (selectedConversation && selectedConversation.is_user && selectedConversation.id == message.sender_id || selectedConversation.id == message.receiver_id) {
             setLocalMessages((prevMessages) => [...prevMessages, message]);
         }
     };
-    const AttachmentClick = (attachment , index) => {
+
+const messageDeleted = ({ message, prevMessage }) => {
+    if (!selectedConversation) return;
+
+    setLocalMessages((prevMessages) =>
+        prevMessages.filter((m) => m.id !== message.id)
+    );
+};
+
+
+
+    const AttachmentClick = (attachment, index) => {
         setPreviewAttachment({ attachment, index });
-        setShowAttachmentPreview(true);
+        setShowAttachmentPreview(false);
     };
 
-console.log("selectedConversation", selectedConversation)
+    console.log("selectedConversation", selectedConversation)
     useEffect(() => {
         setTimeout(() => {
             if (messagesCtrRef.current) {
@@ -40,8 +50,12 @@ console.log("selectedConversation", selectedConversation)
             }
         }, 10);
         const offCreated = on('message.created', messageCreated);
+        const offDeleted = on('message.deleted', messageDeleted);
+
+
         return () => {
             offCreated();
+            offDeleted();
         }
     }, [selectedConversation])
 
@@ -50,6 +64,11 @@ console.log("selectedConversation", selectedConversation)
             setLocalMessages(messages.data.reverse());
         }
     }, [messages]);
+    useEffect(() => {
+        if (localMessages.length > 0 && messagesCtrRef.current) {
+            messagesCtrRef.current.scrollTop = messagesCtrRef.current.scrollHeight;
+        }
+    }, [localMessages]);
     console.log("messages", messages)
     return (
         <>
@@ -94,15 +113,15 @@ console.log("selectedConversation", selectedConversation)
                 </>
             )}
             {previewAttachment.attachment && (
-                    <AttachmentPreviewModal
-                    attachments = {previewAttachment.attachments}
+                <AttachmentPreviewModal
+                    attachments={previewAttachment.attachments}
                     index={previewAttachment.index}
                     show={showAttachmentPreview}
                     onClose={() => setShowAttachmentPreview(false)}
-                    />
+                />
 
-                    
-                )}
+
+            )}
         </>
     );
 }
