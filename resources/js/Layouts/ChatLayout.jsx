@@ -5,6 +5,7 @@ import { PencilSquareIcon } from '@heroicons/react/24/solid'
 import TextInput from "@/Components/TextInput";
 import ConversationItem from "@/Components/App/ConversationItem";
 import { useEventBus } from '@/EventBus';
+import GroupModal from "@/Components/App/GroupModal";
 
 
 
@@ -18,6 +19,7 @@ const ChatLayout = ({ children }) => {
     const [localConversations, setLocalConversations] = useState(conversations);
     const [sortedConversations, setSortedConversations] = useState([]);
     const [onlineUsers, setOnlineUsers] = useState({});
+    const [showGroupModal , setShowGroupModal] = useState(false);
     const isUserOnline = (userId) => onlineUsers[userId];
     const onSearch = (e) => {
         const search = e.target.value.toLowerCase();
@@ -91,11 +93,14 @@ const messageDeleted = ({ prevMessage }) => {
 
         const offCreated = on('message.created', messageCreated);
         const offDeleted = on('message.deleted', messageDeleted);
-
+        const offModalShow = on('GroupModal.show',(group) => {
+            setShowGroupModal(true);
+        });
 
         return () => {
             offCreated();
             offDeleted();
+            offModalShow();
         }
     }, [selectedConversation])
     useEffect(() => {
@@ -171,7 +176,7 @@ const messageDeleted = ({ prevMessage }) => {
                     <div className="flex items-center justify-between py-2 px-3 text-xl font-medium">
                         <span>Conversations</span>
                         <div className="tooltip tooltip-left" data-tip="Create new Group">
-                            <button className="text-gray-400 hover:text-grey-300">
+                            <button onClick={ev => setShowGroupModal(true)} className="text-gray-400 hover:text-grey-300">
                                 <PencilSquareIcon className="w-4 h-4 inline-block ml-2" />
                                 New Group
                             </button>
@@ -200,6 +205,9 @@ const messageDeleted = ({ prevMessage }) => {
                     {children}
                 </div>
             </div>
+            <GroupModal 
+            show={showGroupModal} 
+            onClose={() => setShowGroupModal(false)} />
         </>
     )
 }
