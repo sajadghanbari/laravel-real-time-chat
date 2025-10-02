@@ -57,7 +57,7 @@ const MessageInput = ({ conversation = null }) => {
         if (conversation.is_user) {
             formData.append("receiver_id", conversation.id)
         } else if (conversation.is_group) {
-            formData.append("group_id", conversation);
+            formData.append("group_id", conversation.id);
         }
 
         setMessageSending(true);

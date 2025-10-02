@@ -17,47 +17,50 @@ export default function AuthenticatedLayout({ header, children }) {
         useState(false);
     const { emit } = useEventBus();
 
-    useEffect(() => {
-        conversations.forEach((conversation) => {
-            let channel = `message.group.${conversation.id}`;
-            if (conversation.is_user) {
-                channel = `message.user.${[parseInt(user.id), parseInt(conversation.id)].sort((a, b) => a - b).join('-')}`;
-            }
-            window.Echo.private(channel)
-                .error((error) => {
-                    console.error(error)
+useEffect(() => {
+    conversations.forEach((conversation) => {
+        let channel = conversation.is_group
+            ? `message.group.${conversation.id}`
+            : `message.user.${[parseInt(user.id), parseInt(conversation.id)].sort((a, b) => a - b).join('-')}`;
 
-                })
-                .listen("SocketMessage", (e) => {
-                    console.log("SocketMessage", e)
-                    const message = e.message;
-
-                    emit("message.created", message)
-                    if (message.sender_id === user.id) {
-                        return;
-                    }
+        window.Echo.private(channel)
+            .listen("SocketMessage", (e) => {
+                console.log("📩 سوکت پیام گرفت:", e.message);
+                const message = e.message;
+                emit("message.created", message);
+                if (message.sender_id !== user.id) {
                     emit("newMessageNotification", {
                         user: message.sender,
                         group_id: message.group_id,
-                        message:
-                            message.message || `Shared ${message.attachments.length === 1
-                                ? "an attachment"
-                                : message.attachments.length + " attachments"
-                            }`,
-
+                        message: message.message || `Shared ${message.attachments.length} attachments`,
                     });
-                });
-        })
-        return () => {
-            conversations.forEach((conversation) => {
-                let channel = `message.group.${conversation.id}`;
-                if (conversation.is_user) {
-                    channel = `message.user.${[parseInt(user.id), parseInt(conversation.id)].sort((a, b) => a - b).join("-")}`;
                 }
-                window.Echo.leave(channel);
             });
-        };
-    }, [conversations]);
+
+        if (conversation.is_group) {
+            console.log("Joining group channel:", conversation.id);
+            window.Echo.private(`group.deleted.${conversation.id}`)
+                .listen("GroupDeleted", (e) => {
+                    emit("group.deleted", { id: e.id, name: e.name });
+                });
+        }
+    });
+
+    return () => {
+        conversations.forEach((conversation) => {
+            let channel = conversation.is_group
+                ? `message.group.${conversation.id}`
+                : `message.user.${[parseInt(user.id), parseInt(conversation.id)].sort((a, b) => a - b).join('-')}`;
+
+            window.Echo.leave(channel);
+
+            if (conversation.is_group) {
+                window.Echo.leave(`group.deleted.${conversation.id}`);
+            }
+        });
+    };
+}, [conversations]);
+
 
 
     return (

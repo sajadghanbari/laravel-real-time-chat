@@ -2,7 +2,7 @@ import { Combobox, ComboboxButton, Transition } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/24/solid";
 import { Fragment, useState } from "react"
 
-export default function UserPicker({ value, options }) {
+export default function UserPicker({ onselect, options,value }) {
     const [selected, setSelected] = useState(value);
     const [query, setQuery] = useState("");
 
@@ -17,7 +17,7 @@ export default function UserPicker({ value, options }) {
             );
     const onSelected = (persons) => {
         setSelected(persons);
-        onSelect(persons);
+        onselect(persons);
     }
 
     return (
@@ -84,7 +84,7 @@ export default function UserPicker({ value, options }) {
                 </div>
             </Combobox>
             {selected && (
-                <div className="flex gap-2 mt-3">
+                <div className="flex flex-wrap gap-2 mt-3">
                     {selected.map((person) =>
                         <div
                             key={person.id}

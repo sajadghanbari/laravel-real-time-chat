@@ -116,7 +116,7 @@ export default function GroupModal({ show = false, onClose = () => { } }) {
                             ) || []
                         }
                         options={users}
-                        onSelect={(users) => 
+                        onselect={(users) => 
                             setData(
                                 "user_ids",
                                 users.map((u) => u.id)
