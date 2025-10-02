@@ -37,9 +37,13 @@ class ProfileController extends Controller
             if($user->avatar){
                 Storage::disk('public')->delete($user->avatar);
             }
+            $avatarName = uniqid('avatar_'.$user->id.'_').'.'.$avatar->getClientOriginalExtension();
 
-            $data['avatar'] = $avatar->store('avatar','public');
+            $user->avatar = $avatar->storeAs('avatar',$avatarName,'public');
         }
+
+        unset($data['avatar']);
+
         $user->fill($data);
 
         if ($request->user()->isDirty('email')) {

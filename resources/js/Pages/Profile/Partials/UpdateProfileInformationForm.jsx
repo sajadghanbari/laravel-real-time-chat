@@ -1,3 +1,4 @@
+import UserAvatar from '@/Components/App/UserAvatar';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
@@ -12,16 +13,18 @@ export default function UpdateProfileInformation({
 }) {
     const user = usePage().props.auth.user;
 
-    const { data, setData, patch, errors, processing, recentlySuccessful } =
+    const { data, setData, post, errors, processing, recentlySuccessful } =
         useForm({
             name: user.name,
+            avatar: null,
             email: user.email,
+            _method: "PATCH"
         });
 
     const submit = (e) => {
         e.preventDefault();
 
-        patch(route('profile.update'));
+        post(route('profile.update'));
     };
 
     return (
@@ -37,6 +40,7 @@ export default function UpdateProfileInformation({
             </header>
 
             <form onSubmit={submit} className="mt-6 space-y-6">
+                <UserAvatar profile={true} user={user} />
                 <div>
                     <InputLabel htmlFor="name" value="Name" />
 
@@ -49,6 +53,20 @@ export default function UpdateProfileInformation({
                         isFocused
                         autoComplete="name"
                     />
+
+                    <InputError className="mt-2" message={errors.name} />
+                </div>
+
+                                <div>
+                    <InputLabel htmlFor="avatar" value="Avatar" />
+
+                    <input
+                        id='avatar' 
+                        type="file"
+                        className='file-input file-input-bordered file-input-primary w-full'
+                        onChange={(e) => setData("avatar",e.target.files[0])}
+                    />
+
 
                     <InputError className="mt-2" message={errors.name} />
                 </div>

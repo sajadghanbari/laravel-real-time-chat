@@ -30,6 +30,7 @@ export default function GroupUsersPopover({ users = [] }) {
                     >
                         <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
                             <div className="bg-gray-800 py-2">
+            {console.log(users)}
                                 {users.map((user) => (
                                     <Link
                                         href={route("chat.user", user.id)}
