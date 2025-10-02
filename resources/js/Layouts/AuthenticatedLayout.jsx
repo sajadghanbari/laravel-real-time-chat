@@ -72,7 +72,7 @@ useEffect(() => {
                             <div className="flex">
                                 <div className="flex shrink-0 items-center">
                                     <Link href="/">
-                                        <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
+                                        <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200 ms-0" />
                                     </Link>
                                 </div>
 

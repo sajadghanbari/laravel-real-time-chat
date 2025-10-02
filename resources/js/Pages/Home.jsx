@@ -27,20 +27,20 @@ function Home(selectedConversation = null, messages = null) {
         }
     };
 
-const messageDeleted = ({ message, prevMessage }) => {
-    if (!selectedConversation) return;
+    const messageDeleted = ({ message, prevMessage }) => {
+        if (!selectedConversation) return;
 
-    setLocalMessages((prevMessages) =>
-        prevMessages.filter((m) => m.id !== message.id)
-    );
-};
-
-
-
-    const AttachmentClick = (attachment, index) => {
-        setPreviewAttachment({ attachment, index });
-        setShowAttachmentPreview(false);
+        setLocalMessages((prevMessages) =>
+            prevMessages.filter((m) => m.id !== message.id)
+        );
     };
+
+
+
+const onAttachmentClick = (attachments, index = 0) => {
+    setPreviewAttachment({ attachments, index });
+    setShowAttachmentPreview(true);
+};
 
     console.log("selectedConversation", selectedConversation)
     useEffect(() => {
@@ -104,6 +104,7 @@ const messageDeleted = ({ message, prevMessage }) => {
                                     <MessageItem
                                         key={message.id}
                                         message={message}
+                                        attachmentClick={onAttachmentClick}
                                     />
                                 ))}
                             </div>
@@ -112,16 +113,14 @@ const messageDeleted = ({ message, prevMessage }) => {
                     <MessageInput conversation={selectedConversation} />
                 </>
             )}
-            {previewAttachment.attachment && (
-                <AttachmentPreviewModal
-                    attachments={previewAttachment.attachments}
-                    index={previewAttachment.index}
-                    show={showAttachmentPreview}
-                    onClose={() => setShowAttachmentPreview(false)}
-                />
-
-
-            )}
+{previewAttachment.attachments && previewAttachment.attachments.length > 0 && (
+    <AttachmentPreviewModal
+        attachments={previewAttachment.attachments}
+        index={previewAttachment.index || 0}
+        show={showAttachmentPreview}
+        onClose={() => setShowAttachmentPreview(false)}
+    />
+)}
         </>
     );
 }

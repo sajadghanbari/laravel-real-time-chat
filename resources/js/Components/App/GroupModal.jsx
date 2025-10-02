@@ -1,5 +1,5 @@
 import { useEventBus } from "@/EventBus";
-import { useForm, usePage } from "@inertiajs/react";
+import { router, useForm, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import Modal from "../Modal";
 import InputLabel from "../InputLabel";
@@ -13,7 +13,7 @@ import PrimaryButton from "../PrimaryButton";
 export default function GroupModal({ show = false, onClose = () => { } }) {
     const page = usePage();
     const conversations = page.props.conversations;
-    const {on, emit } = useEventBus();
+    const { on, emit } = useEventBus();
     const [group, setGroup] = useState({});
 
     const { data, setData, processing, reset, post, put, errors } = useForm({
@@ -39,7 +39,7 @@ export default function GroupModal({ show = false, onClose = () => { } }) {
 
         post(route("group.store"), {
             onSuccess: () => {
-                emit("toast.show", `Group "${data.name}" was created`)
+                emit("toast.show", `Group "${data.name}" was created`);
                 closeModal();
             }
         })
@@ -116,7 +116,7 @@ export default function GroupModal({ show = false, onClose = () => { } }) {
                             ) || []
                         }
                         options={users}
-                        onselect={(users) => 
+                        onselect={(users) =>
                             setData(
                                 "user_ids",
                                 users.map((u) => u.id)

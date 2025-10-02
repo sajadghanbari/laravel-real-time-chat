@@ -222,9 +222,9 @@ const MessageInput = ({ conversation = null }) => {
                         <EmojiPicker theme="dark" onEmojiClick={ev => setNewMessage(newMessage + ev.emoji)} />
                     </Popover.Panel>
                 </Popover>
-                <button onClick={onLikeClick} className="p-1 text-gray-400 hover:text-gray-300 ">
+                {/* <button onClick={onLikeClick} className="p-1 text-gray-400 hover:text-gray-300 ">
                     <HandThumbUpIcon className="w-6 h-6" />
-                </button>
+                </button> */}
             </div>
 
         </div>

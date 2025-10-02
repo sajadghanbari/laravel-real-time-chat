@@ -9,10 +9,10 @@ import {
 } from "@heroicons/react/24/solid";
 import { isAudio, isImage, isPDF, isPreViewable, isVideo } from "@/helpers";
 const AttachmentPreviewModal = ({
-    attachments,
+    attachments = [],
     index,
     show = false,
-    onClose = () => { }
+    onClose = () => {},
 }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -26,6 +26,7 @@ const AttachmentPreviewModal = ({
     const close = () => {
         onClose();
     }
+    
 
     const prev = () => {
         if (currentIndex === 0) {
@@ -43,6 +44,10 @@ const AttachmentPreviewModal = ({
     useEffect(() => {
         setCurrentIndex(index);
     }, [index]);
+
+    console.log('Current attachment:', attachment);
+console.log('PreViewable attachments:', preViewableAttachments);
+
 
     return (
         <div>
@@ -95,7 +100,7 @@ const AttachmentPreviewModal = ({
                                                 </div>
                                             )
                                         }
-                                        {currentIndex < preViewableAttachments.length - 1 && (
+                                        {currentIndex < (preViewableAttachments.length - 1) && (
                                             <div
                                                 onClick={next}
                                                 className="absolute opacity-100 text-gray-100 cursor-pointer flex items-center justify-center w-16 h-16 right-4 top-1/2 -translate-y-1/2 rounded-full bg-black/50 z-30"
