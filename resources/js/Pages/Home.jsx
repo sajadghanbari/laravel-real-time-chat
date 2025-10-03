@@ -18,8 +18,8 @@ function Home(selectedConversation = null, messages = null) {
     const loadMoreIntersect = useRef(null);
     const [localMessages, setLocalMessages] = useState([]);
     const messagesCtrRef = useRef(null);
-    const  [noMoreMessages , setNoMoreMessages] = useState(false);
-    const [ scrollFromBottom , setScrollFromBottom] = useState(0)
+    const [noMoreMessages, setNoMoreMessages] = useState(false);
+    const [scrollFromBottom, setScrollFromBottom] = useState(0)
     const [showAttachmentPreview, setShowAttachmentPreview] = useState(false);
     const [previewAttachment, setPreviewAttachment] = useState({});
     const { on } = useEventBus();
@@ -33,7 +33,7 @@ function Home(selectedConversation = null, messages = null) {
 
     const loadMoreMessages = useCallback(() => {
 
-        if(noMoreMessages){
+        if (noMoreMessages) {
             return;
         }
 
@@ -54,10 +54,12 @@ function Home(selectedConversation = null, messages = null) {
                 setScrollFromBottom(tmpScrollFromBottom);
 
                 setLocalMessages((prevMessages) => {
-                    return [...data.data.reverse(), ...prevMessages];
-                })
+                    const newMessages = [...data.data.reverse(), ...prevMessages];
+                    const uniqueMessages = Array.from(new Map(newMessages.map(m => [m.id, m])).values());
+                    return uniqueMessages;
+                });
             });
-    }, [localMessages ,noMoreMessages])
+    }, [localMessages, noMoreMessages])
 
     const messageDeleted = ({ message, prevMessages }) => {
         if (!selectedConversation) return;
@@ -104,39 +106,39 @@ function Home(selectedConversation = null, messages = null) {
     }, [localMessages]);
     console.log("messages", messages)
 
-useEffect(() => {
-    if (messagesCtrRef.current && scrollFromBottom !== null) {
-        messagesCtrRef.current.scrollTop =
-            messagesCtrRef.current.scrollHeight -
-            messagesCtrRef.current.offsetHeight -
-            scrollFromBottom;
-    }
-
-    if(noMoreMessages){
-        return;
-    }
-
-    const observer = new IntersectionObserver(
-        (entries) =>
-            entries.forEach(
-                (entry) => entry.isIntersecting && loadMoreMessages()
-            ),
-        {
-            rootMargin: "0px 0px 250px 0px",
+    useEffect(() => {
+        if (messagesCtrRef.current && scrollFromBottom !== null) {
+            messagesCtrRef.current.scrollTop =
+                messagesCtrRef.current.scrollHeight -
+                messagesCtrRef.current.offsetHeight -
+                scrollFromBottom;
         }
-    );
 
-    if(loadMoreIntersect.current){
-        setTimeout(() => {
-            observer.observe(loadMoreIntersect.current);
-        },100)
-    }
+        if (noMoreMessages) {
+            return;
+        }
 
-    return () => {
-        observer.disconnect();
-    }
+        const observer = new IntersectionObserver(
+            (entries) =>
+                entries.forEach(
+                    (entry) => entry.isIntersecting && loadMoreMessages()
+                ),
+            {
+                rootMargin: "0px 0px 250px 0px",
+            }
+        );
 
-}, [localMessages])
+        if (loadMoreIntersect.current) {
+            setTimeout(() => {
+                observer.observe(loadMoreIntersect.current);
+            }, 100)
+        }
+
+        return () => {
+            observer.disconnect();
+        }
+
+    }, [localMessages])
 
     return (
         <>
