@@ -8,14 +8,18 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import ChatLayout from '@/Layouts/ChatLayout';
 import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/solid';
 import { Head, usePage } from '@inertiajs/react';
-import { useEffect, useRef, useState } from 'react';
+import axios from 'axios';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 function Home(selectedConversation = null, messages = null) {
     const { messages: messagesProp, selectedConversation: selectedConversationProp } = usePage().props;
     selectedConversation = selectedConversationProp;
     messages = messagesProp;
+    const loadMoreIntersect = useRef(null);
     const [localMessages, setLocalMessages] = useState([]);
     const messagesCtrRef = useRef(null);
+    const  [noMoreMessages , setNoMoreMessages] = useState(false);
+    const [ scrollFromBottom , setScrollFromBottom] = useState(0)
     const [showAttachmentPreview, setShowAttachmentPreview] = useState(false);
     const [previewAttachment, setPreviewAttachment] = useState({});
     const { on } = useEventBus();
@@ -27,7 +31,35 @@ function Home(selectedConversation = null, messages = null) {
         }
     };
 
-    const messageDeleted = ({ message, prevMessage }) => {
+    const loadMoreMessages = useCallback(() => {
+
+        if(noMoreMessages){
+            return;
+        }
+
+        const firstMessage = localMessages[0];
+        axios
+            .get(route("messages.loadOlder", firstMessage.id))
+            .then(({ data }) => {
+                if (data.data.length === 0) {
+                    setNoMoreMessages(true);
+                    return;
+                }
+
+                const scrollHeight = messagesCtrRef.current.scrollHeight;
+                const scrollTop = messagesCtrRef.current.scrollTop;
+                const clientHeight = messagesCtrRef.current.clientHeight;
+                const tmpScrollFromBottom = (scrollHeight - scrollTop - clientHeight);
+                console.log("tmpScrollFromBottom", tmpScrollFromBottom);
+                setScrollFromBottom(tmpScrollFromBottom);
+
+                setLocalMessages((prevMessages) => {
+                    return [...data.data.reverse(), ...prevMessages];
+                })
+            });
+    }, [localMessages ,noMoreMessages])
+
+    const messageDeleted = ({ message, prevMessages }) => {
         if (!selectedConversation) return;
 
         setLocalMessages((prevMessages) =>
@@ -37,10 +69,10 @@ function Home(selectedConversation = null, messages = null) {
 
 
 
-const onAttachmentClick = (attachments, index = 0) => {
-    setPreviewAttachment({ attachments, index });
-    setShowAttachmentPreview(true);
-};
+    const onAttachmentClick = (attachments, index = 0) => {
+        setPreviewAttachment({ attachments, index });
+        setShowAttachmentPreview(true);
+    };
 
     console.log("selectedConversation", selectedConversation)
     useEffect(() => {
@@ -52,7 +84,8 @@ const onAttachmentClick = (attachments, index = 0) => {
         const offCreated = on('message.created', messageCreated);
         const offDeleted = on('message.deleted', messageDeleted);
 
-
+        setScrollFromBottom(0);
+        setNoMoreMessages(false);
         return () => {
             offCreated();
             offDeleted();
@@ -70,6 +103,41 @@ const onAttachmentClick = (attachments, index = 0) => {
         }
     }, [localMessages]);
     console.log("messages", messages)
+
+useEffect(() => {
+    if (messagesCtrRef.current && scrollFromBottom !== null) {
+        messagesCtrRef.current.scrollTop =
+            messagesCtrRef.current.scrollHeight -
+            messagesCtrRef.current.offsetHeight -
+            scrollFromBottom;
+    }
+
+    if(noMoreMessages){
+        return;
+    }
+
+    const observer = new IntersectionObserver(
+        (entries) =>
+            entries.forEach(
+                (entry) => entry.isIntersecting && loadMoreMessages()
+            ),
+        {
+            rootMargin: "0px 0px 250px 0px",
+        }
+    );
+
+    if(loadMoreIntersect.current){
+        setTimeout(() => {
+            observer.observe(loadMoreIntersect.current);
+        },100)
+    }
+
+    return () => {
+        observer.disconnect();
+    }
+
+}, [localMessages])
+
     return (
         <>
             {!messages && (
@@ -100,6 +168,7 @@ const onAttachmentClick = (attachments, index = 0) => {
                         )}
                         {localMessages.length > 0 && (
                             <div className='flex-1 flex flex-col '>
+                                <div ref={loadMoreIntersect}></div>
                                 {localMessages.map((message) => (
                                     <MessageItem
                                         key={message.id}
@@ -113,14 +182,14 @@ const onAttachmentClick = (attachments, index = 0) => {
                     <MessageInput conversation={selectedConversation} />
                 </>
             )}
-{previewAttachment.attachments && previewAttachment.attachments.length > 0 && (
-    <AttachmentPreviewModal
-        attachments={previewAttachment.attachments}
-        index={previewAttachment.index || 0}
-        show={showAttachmentPreview}
-        onClose={() => setShowAttachmentPreview(false)}
-    />
-)}
+            {previewAttachment.attachments && previewAttachment.attachments.length > 0 && (
+                <AttachmentPreviewModal
+                    attachments={previewAttachment.attachments}
+                    index={previewAttachment.index || 0}
+                    show={showAttachmentPreview}
+                    onClose={() => setShowAttachmentPreview(false)}
+                />
+            )}
         </>
     );
 }
