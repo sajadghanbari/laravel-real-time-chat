@@ -84,7 +84,7 @@ Special thanks to the creators of these amazing tools and frameworks:
 ## 🪪 License
 
 This project is released under the **MIT License** — free for personal or commercial use.
----
+
 ## ⚡ Installation
 
 Follow the steps below to get the project running locally:
