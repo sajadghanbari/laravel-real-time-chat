@@ -78,7 +78,33 @@ It features Breeze authentication, user & group management, rich attachments, vo
 Special thanks to the creators of these amazing tools and frameworks:  
 - **Laravel**, **Breeze**, **Sanctum**, **Reverb**  
 - **React**, **Vite**, **Tailwind CSS**
+- 
 
+---
+## ⚡ Installation
+
+Follow the steps below to get the project running locally:
+
+```bash
+# Clone the repository
+git clone https://github.com/sajadghanbari/Laravel.git
+
+# Navigate into the project directory
+cd Laravel
+
+# Install dependencies
+composer install
+npm install && npm run dev
+
+# Copy environment file
+cp .env.example .env
+
+# Configure your database in the .env file, then migrate:
+php artisan migrate --seed
+
+# Start the local server
+php artisan serve
+php artisan reverb:start --debug
 ---
 
 ## 🪪 License
