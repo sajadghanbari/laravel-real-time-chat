@@ -81,6 +81,10 @@ Special thanks to the creators of these amazing tools and frameworks:
 - 
 
 ---
+## 🪪 License
+
+This project is released under the **MIT License** — free for personal or commercial use.
+---
 ## ⚡ Installation
 
 Follow the steps below to get the project running locally:
@@ -105,8 +109,6 @@ php artisan migrate --seed
 # Start the local server
 php artisan serve
 php artisan reverb:start --debug
----
 
-## 🪪 License
 
-This project is released under the **MIT License** — free for personal or commercial use.
+
